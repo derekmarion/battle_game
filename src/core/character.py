@@ -2,7 +2,12 @@ class Character:
     """Main class for all characters in the game."""
 
     def __init__(
-        self, name: str, attack_points: int, defense_points: int, hp: int = 100
+        self,
+        name: str,
+        attack_points: int,
+        defense_points: int,
+        player_character: bool,
+        hp: int = 100,
     ):
         self.name = name
         self.max_hp = hp
@@ -13,6 +18,7 @@ class Character:
         self.level = 1
         self.is_defending = False
         self.special_cooldown = 0
+        self.player_character = player_character
 
     def take_damage(self, damage: int) -> int:
         """Calculate the damage taken by the character."""
