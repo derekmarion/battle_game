@@ -3,15 +3,17 @@ import pygame
 import random
 from .character import Character
 from .action import ActionType
+from src.ai.enemy_ai import get_enemy_action
 
 
 class Battle:
     """Class to handle core battle logic."""
 
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
-        self.clock = pygame.time.Clock()
+    def __init__(self, gui: bool = False):
+        if gui:
+            pygame.init()
+            self.screen = pygame.display.set_mode((800, 600))
+            self.clock = pygame.time.Clock()
         self.current_turn = 0
         self.battle_log = []
         self.selected_character: Optional[Character] = None
@@ -69,6 +71,10 @@ class Battle:
         if self.selected_character.special_cooldown == 0:
             # Implement special ability logic here
             self.selected_character.special_cooldown = 3
+        # TODO: Add a named special ability to the character class
+        self.battle_log.append(
+            {f"{self.selected_character.name} uses a special ability!"}
+        )
 
     def _special_cooldown_decrement(self):
         """Decrement the special cooldown for all characters."""
@@ -87,16 +93,27 @@ class Battle:
     def _game_over(self):
         """Handle the game over state."""
         # Implement game over logic here.
-        pass
+        return True
 
-    def run(self):
+    def run(self, gui: bool = False):
         """Run the battle loop."""
         running = True
-        while running:
+        while running and gui:
             self._handle_events()
             self._update()
             self._render()
             self.clock.tick(60)
+        while running:
+            if not self._game_over():
+                # Get user input for their turn and handle turn
+                user_action = self._handle_user_input_text()
+                self.handle_turn(user_action)
+
+            if not self._game_over():
+                # Get enemy action and handle turn
+                enemy_action = get_enemy_action()
+                self.handle_turn(enemy_action)
+            running = not self._game_over()
 
     def _handle_events(self):
         """Handle pygame events occuring in the UI."""
@@ -117,3 +134,36 @@ class Battle:
         self.screen.fill((255, 255, 255))
         # Render game elements
         pygame.display.flip()
+
+    def _text_handle_user_input(self) -> ActionType:
+        """Handle user input for text-based UI."""
+
+        user_action = self._text_menu()
+        return user_action
+
+    def _text_menu(self) -> ActionType:
+        """Display the text-based menu and return the selected action."""
+        while True:
+            # Display game stats and most recent action
+            print(self.battle_log[-1] if self.battle_log else "Battle Start!")
+            print(
+                f"{self.selected_character.name} HP: {self.selected_character.current_hp}"
+            )
+            print(f"{self.target_character.name} HP: {self.target_character.current_hp}")
+            print("Select an action:")
+            print("1. Attack")
+            print("2. Defend")
+            print("3. Special")
+
+            # Get user input and return the corresponding action
+            user_input = input("Enter the number of your choice: ")
+            if type(int(user_input)) == int and 1 <= int(user_input) <= 3:
+                match user_input:
+                    case "1":
+                        return ActionType.ATTACK
+                    case "2":
+                        return ActionType.DEFEND
+                    case "3":
+                        return ActionType.SPECIAL
+            else:
+                print("Invalid input. Please try again.")
