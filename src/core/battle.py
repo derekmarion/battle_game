@@ -24,6 +24,9 @@ class Battle:
         if not self.selected_character or not self.target_character:
             return
 
+        # Check for special conditions
+        action = self._handle_special_conditions(action)   
+        
         # Handle the selected action
         if action == ActionType.ATTACK:
             self._attack()
@@ -31,6 +34,8 @@ class Battle:
             self._defend()
         elif action == ActionType.SPECIAL:
             self._handle_special()
+        elif action == ActionType.SKIP:
+            self._skip()
 
         # Decrement the special cooldown times for both characters after each turn
         self._special_cooldown_decrement()
@@ -44,6 +49,10 @@ class Battle:
             self.selected_character,
         )
 
+    def _skip(self):
+        """Handle a skip action."""
+        self.battle_log.append(f"{self.selected_character.name} skips their turn!")
+
     def _attack(self):
         """Handle an attack action."""
         damage = (
@@ -52,9 +61,14 @@ class Battle:
             + random.randint(-5, 10)
         )
         actual_damage = self.target_character.take_damage(max(0, damage))
-        self.battle_log.append(
-            f"{self.selected_character.name} attacks {self.target_character.name} for {actual_damage} damage!"
-        )
+        if actual_damage > 0:
+            self.battle_log.append(
+                f"{self.selected_character.name} attacks {self.target_character.name} for {actual_damage} damage!"
+            )
+        elif actual_damage == 0: # Check if the attack did no damage
+            self.battle_log.append(
+                f"{self.selected_character.name} attacks {self.target_character.name} but does no damage!"
+            )
 
         if not self.target_character.is_alive():
             self._check_win_condition()
@@ -69,13 +83,21 @@ class Battle:
     def _handle_special(self):
         """Handle a special action."""
         if self.selected_character.special_cooldown == 0:
-            # Implement special ability logic here
+            if self.selected_character.special_ability_name == "Memory Leak":
+                self.selected_character.special_ability(self.target_character)
             self.selected_character.special_cooldown = 3
-        # TODO: Add a named special ability to the character class
         self.battle_log.append(
-            {f"{self.selected_character.name} uses a special ability!"}
+            {f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!"}
         )
 
+    def _handle_special_conditions(self, action: ActionType) -> ActionType:
+        """Check for special conditions before handling the action."""
+        if self.selected_character.confused:
+            self.battle_log.append(f"{self.selected_character.name} is confused!")
+            self.selected_character.confused = False  # Reset the confused state
+            return random.choice(list(ActionType))
+        return action
+    
     def _special_cooldown_decrement(self):
         """Decrement the special cooldown for all characters."""
         if self.selected_character.special_cooldown > 0:
@@ -149,7 +171,9 @@ class Battle:
             print(
                 f"{self.selected_character.name} HP: {self.selected_character.current_hp}"
             )
-            print(f"{self.target_character.name} HP: {self.target_character.current_hp}")
+            print(
+                f"{self.target_character.name} HP: {self.target_character.current_hp}"
+            )
             print("Select an action:")
             print("1. Attack")
             print("2. Defend")

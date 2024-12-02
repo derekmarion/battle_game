@@ -19,6 +19,8 @@ class Character:
         self.is_defending = False
         self.special_cooldown = 0
         self.player_character = player_character
+        self.confused = False
+        self.special_ability_name = ""
 
     def take_damage(self, damage: int) -> int:
         """Calculate the damage taken by the character."""
@@ -57,3 +59,14 @@ class Character:
         self.current_hp = self.max_hp
         self.attack_points += 2
         self.defense_points += 1
+
+
+class cPlusPlus(Character):
+    def __init__(self):
+        super().__init__("C++", 20, 10, False)
+        self.special_cooldown = 0
+        self.special_ability_name = "Memory Leak"
+
+    def special_ability(self, target: Character):
+        """C++ special ability: Memory Leak."""
+        target.confused = True

@@ -36,7 +36,6 @@ class TestBattle:
     def test_handle_turn_attack(self, setup):
         """Test the handle_turn method of the Battle Class for an attack action."""
 
-        # TODO: this test will sometimes fail because damage is random
         starting_hp = self.battle.target_character.current_hp
 
         self.battle.handle_turn(ActionType.ATTACK)
@@ -44,8 +43,11 @@ class TestBattle:
         assert len(self.battle.battle_log) == 1
         assert self.battle.current_turn == 1
 
-        # Check that the target character took damage post swap
-        assert self.battle.selected_character.current_hp < starting_hp
+        # Check that the target character took damage post swap, or that the attack missed
+        assert (
+            self.battle.selected_character.current_hp < starting_hp
+            or self.battle.battle_log[-1].endswith("but does no damage!")
+        )
 
     def test_handle_turn_defend(self, setup):
         """Test the handle_turn method of the Battle Class for a defend action."""
@@ -68,6 +70,32 @@ class TestBattle:
 
         # Check that the target character reset their special cooldown post swap
         assert self.battle.target_character.special_cooldown == 2
+
+    def test_handle_turn_skip(self, setup):
+        """Test the handle_turn method of the Battle Class for a skip action."""
+
+        self.battle.handle_turn(ActionType.SKIP)
+
+        assert len(self.battle.battle_log) == 1
+        assert self.battle.current_turn == 1
+
+        # Check that the selected character skipped their turn
+        assert self.battle.battle_log[-1].endswith("skips their turn!")
+
+    def test_handle_turn_confused(self, setup):
+        """Test the handle_turn method of the Battle Class for a confused character."""
+
+        self.battle.selected_character.confused = True
+
+        self.battle.handle_turn(ActionType.ATTACK)
+
+        assert len(self.battle.battle_log) == 2  # 2 because the confused message is logged
+        assert self.battle.current_turn == 1
+
+        # Check that the battle log reflects the confused state
+        assert self.battle.battle_log[-2].endswith("is confused!")
+        # Check that the selected character reset their confused state (post swap)
+        assert not self.battle.target_character.confused
 
     def test_check_win_condition(self, setup):
         """Test the _check_win_condition method of the Battle Class."""
