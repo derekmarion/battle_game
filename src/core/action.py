@@ -7,3 +7,4 @@ class ActionType(Enum):
     ATTACK = "attack"
     DEFEND = "defend"
     SPECIAL = "special"
+    SKIP = "skip"
