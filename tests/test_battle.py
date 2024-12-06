@@ -1,5 +1,5 @@
 from src.core import Battle
-from src.core import Character
+from src.core import Character, cPlusPlus, Python
 from src.core import ActionType
 import pytest
 
@@ -12,8 +12,8 @@ class TestBattle:
         """Setup new battle and character instances for each test."""
 
         self.battle = Battle(False)
-        self.battle.selected_character = Character("Test", 10, 5, True)
-        self.battle.target_character = Character("Test2", 10, 5, False)
+        self.battle.selected_character = cPlusPlus()
+        self.battle.target_character = Python()
 
     @pytest.fixture
     def mock_user_input_text(self, monkeypatch):
@@ -65,7 +65,7 @@ class TestBattle:
 
         self.battle.handle_turn(ActionType.SPECIAL)
 
-        assert len(self.battle.battle_log) == 1
+        assert len(self.battle.battle_log) == 2 # 2 because the special ability message is logged
         assert self.battle.current_turn == 1
 
         # Check that the target character reset their special cooldown post swap
@@ -97,6 +97,19 @@ class TestBattle:
         # Check that the selected character reset their confused state (post swap)
         assert not self.battle.target_character.confused
 
+    def test_handle_turn_skip_turn(self, setup):
+        """Test the handle-turn method of the Battle Class for a skip turn action."""
+            
+        self.battle.selected_character.skip_turn = True
+
+        self.battle.handle_turn(ActionType.ATTACK)
+
+        assert len(self.battle.battle_log) == 1
+
+        # Check that the selected characters turn was skipped in battle log and skip was reset
+        assert not self.battle.target_character.skip_turn
+        assert self.battle.battle_log[-1].endswith("skips their turn!")
+
     def test_check_win_condition(self, setup):
         """Test the _check_win_condition method of the Battle Class."""
 
@@ -104,7 +117,7 @@ class TestBattle:
 
         self.battle._check_win_condition()
 
-        assert self.battle.battle_log[-1] == "Test2 has been defeated!"
+        assert self.battle.battle_log[-1] == "Python has been defeated!"
         assert (
             self.battle.current_turn == 0
         )  # 0 because the turn counter is not incremented here

@@ -3,7 +3,7 @@ import pygame
 import random
 from .character import Character
 from .action import ActionType
-from src.ai.enemy_ai import get_enemy_action
+from src.ai import get_enemy_action
 
 
 class Battle:
@@ -25,8 +25,8 @@ class Battle:
             return
 
         # Check for special conditions
-        action = self._handle_special_conditions(action)   
-        
+        action = self._handle_special_conditions(action)
+
         # Handle the selected action
         if action == ActionType.ATTACK:
             self._attack()
@@ -65,7 +65,7 @@ class Battle:
             self.battle_log.append(
                 f"{self.selected_character.name} attacks {self.target_character.name} for {actual_damage} damage!"
             )
-        elif actual_damage == 0: # Check if the attack did no damage
+        elif actual_damage == 0:  # Check if the attack did no damage
             self.battle_log.append(
                 f"{self.selected_character.name} attacks {self.target_character.name} but does no damage!"
             )
@@ -83,12 +83,15 @@ class Battle:
     def _handle_special(self):
         """Handle a special action."""
         if self.selected_character.special_cooldown == 0:
-            if self.selected_character.special_ability_name == "Memory Leak":
-                self.selected_character.special_ability(self.target_character)
+            #  Call the special ability of the selected character and get description
+            battle_log_description = self.selected_character.special_ability(self.target_character)
             self.selected_character.special_cooldown = 3
-        self.battle_log.append(
-            {f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!"}
-        )
+        else:
+            self.battle_log.append(
+                f"{self.selected_character.name} is still recharging their special ability!"
+            )
+        self.battle_log.append(f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!")
+        self.battle_log.append(battle_log_description)
 
     def _handle_special_conditions(self, action: ActionType) -> ActionType:
         """Check for special conditions before handling the action."""
@@ -96,8 +99,11 @@ class Battle:
             self.battle_log.append(f"{self.selected_character.name} is confused!")
             self.selected_character.confused = False  # Reset the confused state
             return random.choice(list(ActionType))
+        elif self.selected_character.skip_turn:
+            self.selected_character.skip_turn = False  # Reset the skip turn state
+            return ActionType.SKIP
         return action
-    
+
     def _special_cooldown_decrement(self):
         """Decrement the special cooldown for all characters."""
         if self.selected_character.special_cooldown > 0:
@@ -120,6 +126,7 @@ class Battle:
     def run(self, gui: bool = False):
         """Run the battle loop."""
         running = True
+
         while running and gui:
             self._handle_events()
             self._update()
