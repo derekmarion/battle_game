@@ -3,7 +3,7 @@ class TestCharacter:
 
     from src.core import Character
 
-    character = Character("Test", 10, 5, True)
+    character = Character("Test", 10, 5)
 
     def test_character_init(self):
         """Test the __init__ method of the Character class."""
