@@ -6,7 +6,6 @@ class Character:
         name: str,
         attack_points: int,
         defense_points: int,
-        player_character: bool,
         hp: int = 100,
     ):
         self.name = name
@@ -18,9 +17,9 @@ class Character:
         self.level = 1
         self.is_defending = False
         self.special_cooldown = 0
-        self.player_character = player_character
         self.confused = False
         self.special_ability_name = ""
+        self.skip_turn = False
 
     def take_damage(self, damage: int) -> int:
         """Calculate the damage taken by the character."""
@@ -62,11 +61,46 @@ class Character:
 
 
 class cPlusPlus(Character):
-    def __init__(self):
-        super().__init__("C++", 20, 10, False)
+    def __init__(self, player_character: bool = False):
+        super().__init__("C++", 20, 10)
         self.special_cooldown = 0
         self.special_ability_name = "Memory Leak"
+        self.player_character = player_character
 
     def special_ability(self, target: Character):
-        """C++ special ability: Memory Leak."""
+        """C++ special ability: Memory Leak.
+
+        Causes the other character to randomly choose their next action.
+        """
         target.confused = True
+        return f"{self.name} causes {target.name} to be confused!"
+
+
+class Python(Character):
+    def __init__(self, player_character: bool = False):
+        super().__init__("Python", 20, 10)
+        self.special_cooldown = 0
+        self.special_ability_name = "Dynamic Typing"
+        self.player_character = player_character
+
+    def special_ability(self, target: Character) -> str:
+        """Python special ability: Dynamic Typing.
+
+        Causes the other character to skip their next turn."""
+        target.skip_turn = True
+        return f"{target.name} skips their next turn!"
+
+
+class Rust(Character):
+    def __init__(self, player_character: bool = False):
+        super().__init__("Rust", 20, 10)
+        self.special_cooldown = 0
+        self.special_ability_name = "Borrow Checker"
+        self.player_character = player_character
+
+    def special_ability(self, target: Character) -> str:
+        """Rust special ability: Borrow Checker.
+
+        Heals 30 HP."""
+        self.heal(30)
+        return f"{self.name} heals 30 HP!"
