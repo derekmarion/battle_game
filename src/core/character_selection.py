@@ -11,7 +11,7 @@ class Menu:
         self.non_player_character = None
 
     def run(self):
-        """Run the menu."""
+        """Run the menu character selection menu."""
         self.character_selection()
         print(f"You have selected {self.player_character.name} as your character.")
         print(f"Your opponent will be {self.non_player_character.name}.")
