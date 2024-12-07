@@ -140,7 +140,7 @@ class Battle:
         while running:
             if not self._game_over:
                 # Get user input for their turn and handle turn
-                user_action = self._handle_user_input_text()
+                user_action = self._text_handle_user_input()
                 self.handle_turn(user_action)
 
             if not self._game_over:
