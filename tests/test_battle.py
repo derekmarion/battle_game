@@ -110,12 +110,12 @@ class TestBattle:
         assert not self.battle.target_character.skip_turn
         assert self.battle.battle_log[-1].endswith("skips their turn!")
 
-    def test_check_win_condition(self, setup):
-        """Test the _check_win_condition method of the Battle Class."""
+    def test_handle_game_over(self, setup):
+        """Test the handle_game_over method of the Battle Class."""
 
         self.battle.target_character.current_hp = 0
 
-        self.battle._check_win_condition()
+        self.battle._handle_game_over()
 
         assert self.battle.battle_log[-1] == "Python has been defeated!"
         assert (

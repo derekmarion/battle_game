@@ -9,15 +9,23 @@ from src.ai import get_enemy_action
 class Battle:
     """Class to handle core battle logic."""
 
-    def __init__(self, gui: bool = False):
+    def __init__(
+        self,
+        gui: bool = False,
+        player_character: Character = None,
+        enemy_character: Character = None,
+    ):
         if gui:
             pygame.init()
             self.screen = pygame.display.set_mode((800, 600))
             self.clock = pygame.time.Clock()
         self.current_turn = 0
         self.battle_log = []
-        self.selected_character: Optional[Character] = None
-        self.target_character: Optional[Character] = None
+        self.selected_character: Optional[Character] = (
+            player_character  # Player character goes first
+        )
+        self.target_character: Optional[Character] = enemy_character
+        self._game_over = False
 
     def handle_turn(self, action: ActionType):
         """Handle a turn in the battle."""
@@ -71,7 +79,7 @@ class Battle:
             )
 
         if not self.target_character.is_alive():
-            self._check_win_condition()
+            self._handle_game_over()
 
     def _defend(self):
         """Handle a defend action."""
@@ -84,13 +92,17 @@ class Battle:
         """Handle a special action."""
         if self.selected_character.special_cooldown == 0:
             #  Call the special ability of the selected character and get description
-            battle_log_description = self.selected_character.special_ability(self.target_character)
+            battle_log_description = self.selected_character.special_ability(
+                self.target_character
+            )
             self.selected_character.special_cooldown = 3
         else:
             self.battle_log.append(
                 f"{self.selected_character.name} is still recharging their special ability!"
             )
-        self.battle_log.append(f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!")
+        self.battle_log.append(
+            f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!"
+        )
         self.battle_log.append(battle_log_description)
 
     def _handle_special_conditions(self, action: ActionType) -> ActionType:
@@ -111,17 +123,10 @@ class Battle:
         if self.target_character.special_cooldown > 0:
             self.target_character.special_cooldown -= 1
 
-    def _check_win_condition(self):
-        """Check if the battle has been won."""
-        if not self.target_character.is_alive():
-            self.battle_log.append(f"{self.target_character.name} has been defeated!")
-
-        self._game_over()
-
-    def _game_over(self):
+    def _handle_game_over(self):
         """Handle the game over state."""
-        # Implement game over logic here.
-        return True
+        self.battle_log.append(f"{self.target_character.name} has been defeated!")
+        self._game_over = True
 
     def run(self, gui: bool = False):
         """Run the battle loop."""
@@ -133,16 +138,15 @@ class Battle:
             self._render()
             self.clock.tick(60)
         while running:
-            if not self._game_over():
+            if not self._game_over:
                 # Get user input for their turn and handle turn
                 user_action = self._handle_user_input_text()
                 self.handle_turn(user_action)
 
-            if not self._game_over():
+            if not self._game_over:
                 # Get enemy action and handle turn
                 enemy_action = get_enemy_action()
                 self.handle_turn(enemy_action)
-            running = not self._game_over()
 
     def _handle_events(self):
         """Handle pygame events occuring in the UI."""

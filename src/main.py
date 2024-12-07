@@ -4,7 +4,7 @@ from src.core import Battle, Menu
 def main():
     menu = Menu()
     menu.run()
-    battle = Battle(menu.player_character, menu.non_player_character)
+    battle = Battle(False, menu.player_character, menu.non_player_character)
     battle.run(gui=False)
 
 
