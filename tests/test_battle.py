@@ -65,7 +65,9 @@ class TestBattle:
 
         self.battle.handle_turn(ActionType.SPECIAL)
 
-        assert len(self.battle.battle_log) == 2 # 2 because the special ability message is logged
+        assert (
+            len(self.battle.battle_log) == 2
+        )  # 2 because the special ability message is logged
         assert self.battle.current_turn == 1
 
         # Check that the target character reset their special cooldown post swap
@@ -89,17 +91,17 @@ class TestBattle:
 
         self.battle.handle_turn(ActionType.ATTACK)
 
-        assert len(self.battle.battle_log) == 2  # 2 because the confused message is logged
+        # Not checking battle log length because a confused character will return a random action
         assert self.battle.current_turn == 1
 
         # Check that the battle log reflects the confused state
-        assert self.battle.battle_log[-2].endswith("is confused!")
+        assert self.battle.battle_log[0].endswith("is confused!")
         # Check that the selected character reset their confused state (post swap)
         assert not self.battle.target_character.confused
 
     def test_handle_turn_skip_turn(self, setup):
         """Test the handle-turn method of the Battle Class for a skip turn action."""
-            
+
         self.battle.selected_character.skip_turn = True
 
         self.battle.handle_turn(ActionType.ATTACK)

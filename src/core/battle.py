@@ -21,10 +21,16 @@ class Battle:
             self.clock = pygame.time.Clock()
         self.current_turn = 0
         self.battle_log = []
+        # Initialize the selected and target characters
+        # to facilitate battle logic
         self.selected_character: Optional[Character] = (
             player_character  # Player character goes first
         )
         self.target_character: Optional[Character] = enemy_character
+        # Initilize attributes for the player and enemy characters
+        # to facilitate UI messages
+        self.player_character = player_character
+        self.enemy_character = enemy_character
         self._game_over = False
 
     def handle_turn(self, action: ActionType):
@@ -57,6 +63,9 @@ class Battle:
             self.selected_character,
         )
 
+        if not self.target_character.is_alive():
+            self._handle_game_over()
+
     def _skip(self):
         """Handle a skip action."""
         self.battle_log.append(f"{self.selected_character.name} skips their turn!")
@@ -78,6 +87,7 @@ class Battle:
                 f"{self.selected_character.name} attacks {self.target_character.name} but does no damage!"
             )
 
+        # Check if the target character is defeated and handle game over
         if not self.target_character.is_alive():
             self._handle_game_over()
 
@@ -125,7 +135,16 @@ class Battle:
 
     def _handle_game_over(self):
         """Handle the game over state."""
-        self.battle_log.append(f"{self.target_character.name} has been defeated!")
+        # Check whether the player or enemy character has been defeated
+        if not self.player_character.is_alive():
+            self.battle_log.append("\nYou have been defeated!")
+        else:
+            self.battle_log.append("\nThe enemy has been defeated!")
+        self.battle_log.append("Game Over!")
+
+        # Display the last two battle log entries and break the game loop
+        print(f"{self.battle_log[-2]}")
+        print(f"{self.battle_log[-1]}")
         self._game_over = True
 
     def run(self, gui: bool = False):
@@ -147,6 +166,9 @@ class Battle:
                 # Get enemy action and handle turn
                 enemy_action = get_enemy_action()
                 self.handle_turn(enemy_action)
+
+            if self._game_over:
+                running = False
 
     def _handle_events(self):
         """Handle pygame events occuring in the UI."""
@@ -177,14 +199,14 @@ class Battle:
     def _text_menu(self) -> ActionType:
         """Display the text-based menu and return the selected action."""
         while True:
-            # Display game stats and most recent action
-            print(self.battle_log[-1] if self.battle_log else "Battle Start!")
-            print(
-                f"{self.selected_character.name} HP: {self.selected_character.current_hp}"
-            )
-            print(
-                f"{self.target_character.name} HP: {self.target_character.current_hp}"
-            )
+            # Check battle log for emptiness and print game start message
+            if not self.battle_log:
+                self.battle_log.append("Battle Start!")
+
+            # Display the game context. This is implemented here
+            # because the text-based UI is awaiting user input
+            self._display_game_context()
+
             print("Select an action:")
             print("1. Attack")
             print("2. Defend")
@@ -202,3 +224,23 @@ class Battle:
                         return ActionType.SPECIAL
             else:
                 print("Invalid input. Please try again.")
+
+    def _display_game_context(self):
+        """Display the current game context."""
+        # TODO: Display character stats
+        player_character_stats_display = f"Player({self.player_character.name}): {self.player_character.current_hp} HP"
+        enemy_character_stats_display = (
+            f"Enemy({self.enemy_character.name}): {self.enemy_character.current_hp} HP"
+        )
+        # Display last 5 battle log entries in reverse order
+        battle_log_display = f"""
+        ##############Battle Log##############
+        {self.battle_log[-5] if len(self.battle_log) > 4 else ""}
+        {self.battle_log[-4] if len(self.battle_log) > 3 else ""}
+        {self.battle_log[-3] if len(self.battle_log) > 2 else ""}
+        {self.battle_log[-2] if len(self.battle_log) > 1 else ""}
+        {self.battle_log[-1]}
+        ######################################
+        """
+        print(battle_log_display)
+        print(f"{player_character_stats_display}\t\t{enemy_character_stats_display}\n")
