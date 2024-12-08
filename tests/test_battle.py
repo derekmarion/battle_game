@@ -1,5 +1,5 @@
 from src.core import Battle
-from src.core import Character, cPlusPlus, Python
+from src.core import cPlusPlus, Python
 from src.core import ActionType
 import pytest
 
@@ -11,9 +11,7 @@ class TestBattle:
     def setup(self):
         """Setup new battle and character instances for each test."""
 
-        self.battle = Battle(False)
-        self.battle.selected_character = cPlusPlus()
-        self.battle.target_character = Python()
+        self.battle = Battle(False, Python(), cPlusPlus())
 
     @pytest.fixture
     def mock_user_input_text(self, monkeypatch):
@@ -119,7 +117,7 @@ class TestBattle:
 
         self.battle._handle_game_over()
 
-        assert self.battle.battle_log[-1] == "Python has been defeated!"
+        assert self.battle.battle_log[-1] == "Game Over!"
         assert (
             self.battle.current_turn == 0
         )  # 0 because the turn counter is not incremented here
