@@ -1,3 +1,7 @@
+from .action import ActionType
+import random
+
+
 class Character:
     """Main class for all characters in the game."""
 
@@ -50,7 +54,7 @@ class Character:
             self.level_up()
 
     def level_up(self):
-        """Level up the character."""
+        """Level up the character. Not used in the current version of the game."""
 
         self.level += 1
         self.experience -= 100
@@ -58,6 +62,15 @@ class Character:
         self.current_hp = self.max_hp
         self.attack_points += 2
         self.defense_points += 1
+
+    def get_enemy_action(self) -> ActionType:
+        """Get the enemy action based on the current hp of the character."""
+
+        # If enemy has great than 50 hp, select randomly between attack and special
+        if self.current_hp >= 50:
+            return random.choice([ActionType.ATTACK, ActionType.SPECIAL])
+        else:  # If enemy has less than 50 hp, select randomly between attack and defend
+            return random.choice([ActionType.ATTACK, ActionType.DEFEND])
 
 
 class cPlusPlus(Character):
@@ -67,7 +80,7 @@ class cPlusPlus(Character):
         self.special_ability_name = "Memory Leak"
         self.player_character = player_character
 
-    def special_ability(self, target: Character):
+    def special_ability(self, target: Character) -> str:
         """C++ special ability: Memory Leak.
 
         Causes the other character to randomly choose their next action.

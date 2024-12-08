@@ -110,14 +110,31 @@ class TestBattle:
         assert not self.battle.target_character.skip_turn
         assert self.battle.battle_log[-1].endswith("skips their turn!")
 
+    def test_handle_turn_enemy_ai(self, setup):
+        """Test the handl_turn method of the Battle class for varying hp levels."""
+
+        # Check enemy action for hp >= 50
+        self.battle.target_character.current_hp = 50
+        action = self.battle.target_character.get_enemy_action()
+        assert action in [ActionType.ATTACK, ActionType.SPECIAL]
+
+        # Check enemy action for hp < 50
+        self.battle.target_character.current_hp = 49
+        action = self.battle.target_character.get_enemy_action()
+        assert action in [ActionType.ATTACK, ActionType.DEFEND]
+
     def test_handle_game_over(self, setup):
         """Test the handle_game_over method of the Battle Class."""
 
+        # Check both win and game over conditions
         self.battle.target_character.current_hp = 0
-
         self.battle._handle_game_over()
+        assert self.battle.battle_log[-1] == "You win!"
 
+        self.battle.selected_character.current_hp = 0
+        self.battle._handle_game_over()
         assert self.battle.battle_log[-1] == "Game Over!"
+
         assert (
             self.battle.current_turn == 0
         )  # 0 because the turn counter is not incremented here

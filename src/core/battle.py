@@ -3,7 +3,6 @@ import pygame
 import random
 from .character import Character
 from .action import ActionType
-from src.ai import get_enemy_action
 
 
 class Battle:
@@ -104,16 +103,18 @@ class Battle:
             #  Call the special ability of the selected character and get description
             battle_log_description = self.selected_character.special_ability(
                 self.target_character
-            )
-            self.selected_character.special_cooldown = 3
+            )  # Call the special ability of the selected character and get description
+            self.selected_character.special_cooldown = 3  # Reset the special cooldown
+            self.battle_log.append(
+                f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!"
+            )  # Append the use of special ability to the battle log
+            self.battle_log.append(
+                battle_log_description
+            )  # Append the special ability description to the battle log
         else:
             self.battle_log.append(
                 f"{self.selected_character.name} is still recharging their special ability!"
             )
-        self.battle_log.append(
-            f"{self.selected_character.name} uses {self.selected_character.special_ability_name}!"
-        )
-        self.battle_log.append(battle_log_description)
 
     def _handle_special_conditions(self, action: ActionType) -> ActionType:
         """Check for special conditions before handling the action."""
@@ -138,10 +139,10 @@ class Battle:
         # Check whether the player or enemy character has been defeated
         if not self.player_character.is_alive():
             self.battle_log.append("\nYou have been defeated!")
+            self.battle_log.append("Game Over!")
         else:
             self.battle_log.append("\nThe enemy has been defeated!")
-        self.battle_log.append("Game Over!")
-
+            self.battle_log.append("You win!")
         # Display the last two battle log entries and break the game loop
         print(f"{self.battle_log[-2]}")
         print(f"{self.battle_log[-1]}")
@@ -164,7 +165,7 @@ class Battle:
 
             if not self._game_over:
                 # Get enemy action and handle turn
-                enemy_action = get_enemy_action()
+                enemy_action = self.selected_character.get_enemy_action()
                 self.handle_turn(enemy_action)
 
             if self._game_over:
