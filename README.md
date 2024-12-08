@@ -1,6 +1,12 @@
 # Battle Game
 Turn-based text battle game
 
+## Table of Contents
+- [Installation Instructions](#installation-instructions)
+- [Explanation of Game Mechanics](#explanation-of-game-mechanics)
+- [Tests](#tests)
+- [Gameplay Screenshots](#gameplay-screenshots)
+
 ## Installation instructions
 
 Dependency and package management is handled by poetry. Make sure poetry is installed using your system's package manager
@@ -37,14 +43,14 @@ The core character class has attack, defense, and hit points. Defense points are
 ### Battle Class
 All of the core game mechanics are brokered by the battle class. It's primary mechanism is the main game loop which handles each turn, taking into account who's turn it is, logging actions to the battle log, and accounting for special conditions (such as when a character is below 50 hp, or a character is confused). The Battle class also has methods to handle interactivity with the user, providing the current game state each turn, as well as prompting for input to select a character action.
 ![battle class init](assets/battle_class.png)
-The below screenshot shows the method that handles most of the core game logic. The handle_turn method is called with an ActionType enum which defines what will happend during that turn. The _handle_special_conditions method is called, potentially changing the ActionType for that turn if a character is confused or there is another special condition in play. It then decrements the cooldown for each character's special condition (which can only be used every three turns). The turn counter is incremented, and the selected and target characters are switched (effectively ending the turn). Finally, the method checks if the target character is alive (hp>=0) and handles a game over state if that's the case.
+The below screenshot shows the method that handles most of the core game logic. The handle_turn method is called with an ActionType enum which defines what will happend during that turn. The _handle_special_conditions method is called, potentially changing the ActionType for that turn if a character is confused or there is another special condition in play. It then decrements the cooldown for each character's special condition (which can only be used every three turns). The turn counter is incremented, and the selected and target characters are switched (effectively ending the turn). Finally, the method checks if either of the characters are dead, and handles a game over status if that's the case.
 ![battle class handle turn](assets/battle_class_handle_turn.png)
 
-### Tests
+## Tests
 Pytest is the main testing framework used in this project. Because the Battle class is the most heavily used class handling core game logic, it has the most unit tests.
 ![test](assets/tests.png)
 
-### Gameplay screenshots
+## Gameplay screenshots
 Game start
 ![game start](assets/gameplay_game_start.png)
 Attack Action
