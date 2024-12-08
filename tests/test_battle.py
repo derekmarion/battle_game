@@ -128,11 +128,11 @@ class TestBattle:
 
         # Check both win and game over conditions
         self.battle.target_character.current_hp = 0
-        self.battle._handle_game_over()
+        self.battle._check_win_condition()
         assert self.battle.battle_log[-1] == "You win!"
 
         self.battle.selected_character.current_hp = 0
-        self.battle._handle_game_over()
+        self.battle._check_win_condition()
         assert self.battle.battle_log[-1] == "Game Over!"
 
         assert (

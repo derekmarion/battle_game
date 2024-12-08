@@ -62,8 +62,8 @@ class Battle:
             self.selected_character,
         )
 
-        if not self.target_character.is_alive():
-            self._handle_game_over()
+        # Check for character death and end game if necessary
+        self._check_win_condition()
 
     def _skip(self):
         """Handle a skip action."""
@@ -85,10 +85,6 @@ class Battle:
             self.battle_log.append(
                 f"{self.selected_character.name} attacks {self.target_character.name} but does no damage!"
             )
-
-        # Check if the target character is defeated and handle game over
-        if not self.target_character.is_alive():
-            self._handle_game_over()
 
     def _defend(self):
         """Handle a defend action."""
@@ -134,19 +130,20 @@ class Battle:
         if self.target_character.special_cooldown > 0:
             self.target_character.special_cooldown -= 1
 
-    def _handle_game_over(self):
+    def _check_win_condition(self):
         """Handle the game over state."""
         # Check whether the player or enemy character has been defeated
-        if not self.player_character.is_alive():
-            self.battle_log.append("\nYou have been defeated!")
-            self.battle_log.append("Game Over!")
-        else:
-            self.battle_log.append("\nThe enemy has been defeated!")
-            self.battle_log.append("You win!")
-        # Display the last two battle log entries and break the game loop
-        print(f"{self.battle_log[-2]}")
-        print(f"{self.battle_log[-1]}")
-        self._game_over = True
+        if not self.player_character.is_alive() or not self.enemy_character.is_alive():
+            if not self.player_character.is_alive():
+                self.battle_log.append("\nYou have been defeated!")
+                self.battle_log.append("Game Over!")
+            elif not self.enemy_character.is_alive():
+                self.battle_log.append("\nThe enemy has been defeated!")
+                self.battle_log.append("You win!")
+            # Display the last two battle log entries and break the game loop
+            print(f"{self.battle_log[-2]}")
+            print(f"{self.battle_log[-1]}")
+            self._game_over = True
 
     def run(self, gui: bool = False):
         """Run the battle loop."""
