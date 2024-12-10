@@ -1,4 +1,4 @@
-from src.core import Character, cPlusPlus, Python, Rust
+from .character import Character, cPlusPlus, Python, Rust
 from typing import Tuple
 import random
 

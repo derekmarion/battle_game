@@ -211,8 +211,8 @@ class Battle:
             print("3. Special")
 
             # Get user input and return the corresponding action
-            user_input = input("Enter the number of your choice: ")
-            if type(int(user_input)) == int and 1 <= int(user_input) <= 3:
+            while True:
+                user_input = input("Enter the number of your choice: ")
                 match user_input:
                     case "1":
                         return ActionType.ATTACK
@@ -220,8 +220,8 @@ class Battle:
                         return ActionType.DEFEND
                     case "3":
                         return ActionType.SPECIAL
-            else:
-                print("Invalid input. Please try again.")
+                    case _:
+                        print("Invalid input. Please try again.")
 
     def _display_game_context(self):
         """Display the current game context."""

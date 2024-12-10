@@ -1,4 +1,4 @@
-from src.core import Battle, Menu
+from core import Battle, Menu
 
 
 def main():
